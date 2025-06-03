@@ -1,4 +1,392 @@
-// BohemR Main Application Logic
+// Show recommendations interface with better context and multiple recommendations
+function showRecommendations() {
+    const personality = personalities[appState.personality];
+    
+    // Generate fresh recommendations each time
+    appState.recommendations = recommendationEngine.generatePersonalizedRecommendations();
+    
+    // If we only got one recommendation, generate more
+    if (appState.recommendations.length < 3) {
+        const additionalRecs = generateAdditionalRecommendations();
+        appState.recommendations = [...appState.recommendations, ...additionalRecs];
+    }
+    
+    document.getElementById('app').innerHTML = `
+        <!-- Enhanced Context Strip -->
+        <div class="context-strip">
+            <div class="context-item">
+                <div class="context-label">Your Location</div>
+                <div class="context-value">${getLocationDisplay()}</div>
+            </div>
+            <div class="context-item">
+                <div class="context-label">Right Now</div>
+                <div class="context-value">${getTimeDisplay()}</div>
+            </div>
+            <div class="context-item">
+                <div class="context-label">Understanding</div>
+                <div class="context-value">${getTrustDisplay()}</div>
+            </div>
+        </div>
+        
+        <div class="recommendations-section fade-in">
+            <div class="section-header">
+                <h2 class="section-title" style="color: ${personality.theme.primary}">
+                    Here's what I think you should do right now
+                </h2>
+                <p class="section-subtitle">
+                    Based on your ${personality.title.toLowerCase()} personality, current energy, and what's happening around you
+                </p>
+            </div>
+            
+            ${appState.recommendations.map((rec, index) => `
+                <div class="recommendation-card" data-rec-id="${rec.id}">
+                    <div class="rec-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span style="font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Recommendation ${index + 1}
+                        </span>
+                        <span style="font-size: 0.8rem; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.5px;">
+                            ${rec.priority} priority
+                        </span>
+                    </div>
+                    <div class="rec-main">
+                        <div class="rec-icon">${rec.icon}</div>
+                        <div class="rec-content">
+                            <h3 class="rec-title">${rec.text}</h3>
+                            <p class="rec-context">${rec.context}</p>
+                            <div class="rec-reasoning">
+                                <i class="fas fa-brain" style="opacity: 0.6;"></i>
+                                <span style="font-size: 0.8rem; opacity: 0.7;">Why now: ${rec.reasoning.replace(/_/g, ' ')}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="rec-feedback-enhanced">
+                        <button class="feedback-btn love" onclick="giveDetailedFeedback('${rec.id}', 'love')">
+                            ❤️ Love this
+                        </button>
+                        <button class="feedback-btn like" onclick="giveDetailedFeedback('${rec.id}', 'like')">
+                            👍 Good idea
+                        </button>
+                        <button class="feedback-btn meh" onclick="giveDetailedFeedback('${rec.id}', 'meh')">
+                            😐 Meh
+                        </button>
+                        <button class="feedback-btn nah" onclick="giveDetailedFeedback('${rec.id}', 'nah')">
+                            👎 Not for me
+                        </button>
+                        <button class="feedback-btn already" onclick="giveDetailedFeedback('${rec.id}', 'already')">
+                            ✅ I do this
+                        </button>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+        
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="getMoreRecommendations()">
+                <i class="fas fa-refresh"></i>
+                Give me different ideas
+            </button>
+            <button class="btn btn-secondary" onclick="showPersonalityResults()">
+                <i class="fas fa-user"></i>
+                Review my personality
+            </button>
+        </div>
+    `;
+}
+
+// Generate additional recommendations to ensure we always have multiple options
+function generateAdditionalRecommendations() {
+    const personality = appState.personality;
+    const profile = appState.userProfile;
+    const additionalRecs = [];
+    
+    // Always include a mindfulness option
+    additionalRecs.push({
+        text: "Take 5 minutes to check in with yourself",
+        context: `Your ${personality} mind benefits from occasional pause and reflection`,
+        icon: "🧘",
+        type: "mindfulness",
+        id: "mindfulness-" + Date.now(),
+        reasoning: "personality_based + self_awareness",
+        priority: "medium"
+    });
+    
+    // Energy-based recommendation
+    const energyRec = getEnergyBasedRecommendation();
+    if (energyRec) additionalRecs.push(energyRec);
+    
+    // Time-based recommendation
+    const timeRec = getTimeBasedRecommendation();
+    if (timeRec) additionalRecs.push(timeRec);
+    
+    // Location-based recommendation (if location available)
+    if (appState.location) {
+        const locationRec = getLocationBasedRecommendation();
+        if (locationRec) additionalRecs.push(locationRec);
+    }
+    
+    return additionalRecs;
+}
+
+function getEnergyBasedRecommendation() {
+    const profile = appState.userProfile;
+    const personality = appState.personality;
+    
+    if (profile.energyLevel?.value === 'high') {
+        return {
+            text: "Channel this energy into something meaningful",
+            context: `High energy + ${personality} personality = perfect time for impact`,
+            icon: "🚀",
+            type: "energy",
+            id: "energy-high-" + Date.now(),
+            reasoning: "high_energy + personality_match",
+            priority: "high"
+        };
+    } else if (profile.energyLevel?.value === 'low') {
+        return {
+            text: "Start with the smallest possible step",
+            context: `Low energy doesn't mean no progress - your ${personality} side knows how to build momentum`,
+            icon: "🌱",
+            type: "energy",
+            id: "energy-low-" + Date.now(),
+            reasoning: "low_energy + momentum_building",
+            priority: "high"
+        };
+    }
+    return null;
+}
+
+function getTimeBasedRecommendation() {
+    const time = appState.timeOfDay;
+    const personality = appState.personality;
+    
+    const timeRecs = {
+        morning: {
+            text: "Set your intention for the day",
+            context: `Morning clarity + ${personality} perspective = powerful day ahead`,
+            icon: "🌅",
+            reasoning: "morning_clarity + intention_setting"
+        },
+        afternoon: {
+            text: "Take a midday energy audit",
+            context: `Afternoon is perfect for ${personality} types to reassess and refocus`,
+            icon: "☀️",
+            reasoning: "afternoon_assessment + energy_check"
+        },
+        evening: {
+            text: "Reflect on what went well today",
+            context: `Evening reflection suits your ${personality} nature perfectly`,
+            icon: "🌙",
+            reasoning: "evening_reflection + personality_match"
+        }
+    };
+    
+    const rec = timeRecs[time];
+    if (rec) {
+        return {
+            ...rec,
+            type: "time",
+            id: `time-${time}-` + Date.now(),
+            priority: "medium"
+        };
+    }
+    return null;
+}
+
+function getLocationBasedRecommendation() {
+    const weather = appState.weather;
+    const location = appState.location;
+    
+    if (weather === 'sunny') {
+        return {
+            text: "Step outside and soak in some natural light",
+            context: `Sunny weather in ${location.city || 'your area'} is perfect for boosting mood and energy`,
+            icon: "☀️",
+            type: "location",
+            id: "location-sunny-" + Date.now(),
+            reasoning: "sunny_weather + location_opportunity",
+            priority: "medium"
+        };
+    } else if (weather === 'rainy') {
+        return {
+            text: "Use this cozy weather for focused indoor work",
+            context: `Rainy weather in ${location.city || 'your area'} creates the perfect atmosphere for concentration`,
+            icon: "🌧️",
+            type: "location",
+            id: "location-rainy-" + Date.now(),
+            reasoning: "rainy_weather + focus_opportunity",
+            priority: "medium"
+        };
+    }
+    return null;
+}
+
+// Enhanced context display functions
+function getLocationDisplay() {
+    if (appState.location && appState.location.city) {
+        return `${appState.location.city}, ${appState.location.country}`;
+    } else if (appState.permissions.location) {
+        return "Location detected";
+    } else {
+        return "Not shared";
+    }
+}
+
+function getTimeDisplay() {
+    const weather = appState.weather || 'clear';
+    const time = appState.timeOfDay;
+    const day = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+    
+    return `${weather.charAt(0).toUpperCase() + weather.slice(1)} ${time}, ${day}`;
+}
+
+function getTrustDisplay() {
+    const trustLevels = {
+        1: "Basic",
+        2: "Good", 
+        3: "Deep",
+        4: "Complete"
+    };
+    
+    return trustLevels[appState.trustLevel] || "Building";
+}
+
+// Get more recommendations with variety
+function getMoreRecommendations() {
+    // Clear previous feedback to generate fresh recommendations
+    recommendationEngine.userFeedback = {};
+    
+    // Generate completely new recommendations
+    const newRecs = recommendationEngine.generateMoreRecommendations();
+    const additionalRecs = generateAdditionalRecommendations();
+    
+    // Combine and ensure we have 3-4 different recommendations
+    const allRecs = [...newRecs, ...additionalRecs];
+    
+    // Remove duplicates by type and take up to 4
+    const uniqueRecs = [];
+    const seenTypes = new Set();
+    
+    for (const rec of allRecs) {
+        if (!seenTypes.has(rec.type) && uniqueRecs.length < 4) {
+            uniqueRecs.push(rec);
+            seenTypes.add(rec.type);
+        }
+    }
+    
+    // If we still don't have enough, add some personality-specific ones
+    if (uniqueRecs.length < 3) {
+        const personalityRecs = getPersonalitySpecificRecommendations();
+        uniqueRecs.push(...personalityRecs.slice(0, 4 - uniqueRecs.length));
+    }
+    
+    appState.recommendations = uniqueRecs;
+    showRecommendations();
+}
+
+function getPersonalitySpecificRecommendations() {
+    const personality = appState.personality;
+    const personalityRecs = {
+        confident: [
+            {
+                text: "Take on a challenge that excites you",
+                context: "Your confident nature thrives on meaningful challenges",
+                icon: "🎯",
+                type: "challenge",
+                id: "confident-challenge-" + Date.now(),
+                reasoning: "personality_strength + challenge_seeking",
+                priority: "high"
+            },
+            {
+                text: "Share your expertise with someone who could benefit",
+                context: "Confident personalities grow by helping others grow",
+                icon: "🤝",
+                type: "sharing",
+                id: "confident-share-" + Date.now(),
+                reasoning: "personality_strength + knowledge_sharing",
+                priority: "medium"
+            }
+        ],
+        open: [
+            {
+                text: "Explore something completely new and unfamiliar",
+                context: "Your open nature feeds on novel experiences and fresh perspectives",
+                icon: "🔍",
+                type: "exploration",
+                id: "open-explore-" + Date.now(),
+                reasoning: "personality_strength + novelty_seeking",
+                priority: "high"
+            },
+            {
+                text: "Connect two unrelated ideas or projects",
+                context: "Open personalities excel at finding unexpected connections",
+                icon: "🌐",
+                type: "connection",
+                id: "open-connect-" + Date.now(),
+                reasoning: "personality_strength + pattern_recognition",
+                priority: "medium"
+            }
+        ],
+        stable: [
+            {
+                text: "Strengthen a relationship that matters to you",
+                context: "Your stable nature builds lasting, meaningful connections",
+                icon: "💝",
+                type: "relationship",
+                id: "stable-relationship-" + Date.now(),
+                reasoning: "personality_strength + relationship_building",
+                priority: "high"
+            },
+            {
+                text: "Organize something that's been bothering you",
+                context: "Stable personalities find peace through creating order and systems",
+                icon: "📋",
+                type: "organization",
+                id: "stable-organize-" + Date.now(),
+                reasoning: "personality_strength + system_building",
+                priority: "medium"
+            }
+        ],
+        cautious: [
+            {
+                text: "Research something you've been curious about",
+                context: "Your cautious nature appreciates thorough understanding before action",
+                icon: "📚",
+                type: "research",
+                id: "cautious-research-" + Date.now(),
+                reasoning: "personality_strength + knowledge_gathering",
+                priority: "high"
+            },
+            {
+                text: "Plan your next important decision step by step",
+                context: "Cautious personalities make better decisions with proper planning",
+                icon: "🗺️",
+                type: "planning",
+                id: "cautious-plan-" + Date.now(),
+                reasoning: "personality_strength + decision_planning",
+                priority: "medium"
+            }
+        ]
+    };
+    
+    return personalityRecs[personality] || [];
+}
+
+// Finish onboarding and generate recommendations
+function finishOnboarding() {
+    appState.trustLevel = 3;
+    onboardingStep = 1; // Reset for next time
+    
+    // Generate initial recommendations
+    appState.recommendations = recommendationEngine.generatePersonalizedRecommendations();
+    
+    // Ensure we have multiple recommendations
+    if (appState.recommendations.length < 3) {
+        const additionalRecs = generateAdditionalRecommendations();
+        appState.recommendations = [...appState.recommendations, ...additionalRecs];
+    }
+    
+    showRecommendations();
+}// BohemR Main Application Logic
 
 // Global App State
 let appState = {
@@ -259,9 +647,10 @@ function previewNextQuestion() {
     });
 }
 
-// Show personality results
+// Show personality results with correction mechanism
 function showPersonalityResults() {
     const personality = personalities[appState.personality];
+    const scores = appState.personalityScores;
     
     document.getElementById('app').innerHTML = `
         <div class="personality-reveal glass-strong fade-in">
@@ -273,124 +662,355 @@ function showPersonalityResults() {
             </h2>
             <p class="personality-insight">${personality.insight}</p>
             
+            <!-- Personality Scores Breakdown -->
+            <div class="personality-breakdown" style="margin: 25px 0;">
+                <h3 style="margin-bottom: 15px; font-size: 1.1rem; opacity: 0.9;">Your personality mix:</h3>
+                ${Object.entries(scores).map(([type, score]) => `
+                    <div class="score-bar" style="margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                            <span style="font-size: 0.9rem;">${personalities[type].icon} ${personalities[type].title.replace('The ', '')}</span>
+                            <span style="font-size: 0.9rem; font-weight: 600;">${score}%</span>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div style="background: ${personalities[type].theme.primary}; height: 100%; width: ${score}%; transition: width 0.8s ease;"></div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+            
+            <!-- Does this feel right? -->
+            <div class="accuracy-check" style="margin: 30px 0; padding: 20px; background: rgba(255,255,255,0.05); border-radius: 16px;">
+                <h3 style="margin-bottom: 15px; color: ${personality.theme.primary};">Does this feel accurate?</h3>
+                <div class="accuracy-buttons" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="choice-btn" onclick="confirmAccuracy('perfect')" style="flex: 1; min-width: 140px;">
+                        🎯 Spot on!
+                    </button>
+                    <button class="choice-btn" onclick="confirmAccuracy('mostly')" style="flex: 1; min-width: 140px;">
+                        👍 Mostly accurate
+                    </button>
+                    <button class="choice-btn" onclick="confirmAccuracy('somewhat')" style="flex: 1; min-width: 140px;">
+                        🤔 Somewhat accurate
+                    </button>
+                    <button class="choice-btn" onclick="confirmAccuracy('wrong')" style="flex: 1; min-width: 140px;">
+                        ❌ Not me at all
+                    </button>
+                </div>
+            </div>
+            
             <div class="action-buttons">
                 <button class="btn btn-primary" onclick="showFeedbackForm()">
                     <i class="fas fa-heart"></i>
                     Tell me more about you
                 </button>
-                <button class="btn btn-secondary" onclick="showRecommendations()">
-                    <i class="fas fa-compass"></i>
-                    What should I do now?
+                <button class="btn btn-secondary" onclick="retakeAssessment()">
+                    <i class="fas fa-redo"></i>
+                    Take assessment again
                 </button>
             </div>
         </div>
     `;
 }
 
-// Show progressive onboarding form
+// Handle accuracy confirmation
+function confirmAccuracy(level) {
+    appState.personalityAccuracy = level;
+    
+    // Visual feedback
+    const buttons = document.querySelectorAll('.accuracy-buttons .choice-btn');
+    buttons.forEach(btn => {
+        btn.style.background = 'rgba(255, 255, 255, 0.1)';
+        btn.style.opacity = '0.6';
+    });
+    
+    event.target.style.background = 'rgba(78, 205, 196, 0.3)';
+    event.target.style.borderColor = '#4ECDC4';
+    event.target.style.opacity = '1';
+    
+    if (level === 'wrong') {
+        // Show alternative personality options
+        setTimeout(() => showPersonalityCorrection(), 500);
+    } else if (level === 'perfect' || level === 'mostly') {
+        appState.trustLevel = 3;
+        // Auto-advance to onboarding after 1 second
+        setTimeout(() => showFeedbackForm(), 1000);
+    } else {
+        // Somewhat accurate - proceed but with lower trust
+        appState.trustLevel = 2;
+        setTimeout(() => showFeedbackForm(), 1000);
+    }
+}
+
+// Show personality correction interface
+function showPersonalityCorrection() {
+    const currentPersonality = appState.personality;
+    const otherPersonalities = Object.keys(personalities).filter(p => p !== currentPersonality);
+    
+    document.getElementById('app').innerHTML = `
+        <div class="personality-correction glass-strong fade-in">
+            <h2 style="color: #4ECDC4; margin-bottom: 20px; text-align: center;">
+                Let's find your real personality type
+            </h2>
+            <p style="opacity: 0.8; text-align: center; margin-bottom: 30px;">
+                Which of these feels more like you?
+            </p>
+            
+            <div class="personality-options">
+                ${otherPersonalities.map(type => {
+                    const p = personalities[type];
+                    return `
+                        <div class="personality-option" onclick="selectCorrectedPersonality('${type}')" style="
+                            padding: 20px; 
+                            margin-bottom: 15px; 
+                            background: rgba(255,255,255,0.08); 
+                            border: 2px solid rgba(255,255,255,0.15); 
+                            border-radius: 16px; 
+                            cursor: pointer; 
+                            transition: all 0.3s ease;
+                        ">
+                            <div style="display: flex; align-items: center; gap: 15px;">
+                                <div style="font-size: 2rem;">${p.icon}</div>
+                                <div style="flex: 1;">
+                                    <h3 style="color: ${p.theme.primary}; margin-bottom: 8px;">${p.title}</h3>
+                                    <p style="opacity: 0.8; font-size: 0.9rem; line-height: 1.4;">${p.insight.substring(0, 120)}...</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-secondary" onclick="retakeAssessment()">
+                    <i class="fas fa-redo"></i>
+                    Take the assessment again instead
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Add hover effects
+    const options = document.querySelectorAll('.personality-option');
+    options.forEach(option => {
+        option.addEventListener('mouseenter', () => {
+            option.style.background = 'rgba(255,255,255,0.12)';
+            option.style.borderColor = 'rgba(255,255,255,0.3)';
+        });
+        option.addEventListener('mouseleave', () => {
+            option.style.background = 'rgba(255,255,255,0.08)';
+            option.style.borderColor = 'rgba(255,255,255,0.15)';
+        });
+    });
+}
+
+// Handle corrected personality selection
+function selectCorrectedPersonality(newPersonality) {
+    appState.personality = newPersonality;
+    appState.personalityAccuracy = 'corrected';
+    appState.trustLevel = 2;
+    
+    // Visual feedback
+    event.target.style.background = 'rgba(78, 205, 196, 0.3)';
+    event.target.style.borderColor = '#4ECDC4';
+    
+    setTimeout(() => {
+        // Recalculate personality scores for the corrected type
+        appState.personalityScores = {
+            [newPersonality]: 75,
+            ...Object.fromEntries(
+                Object.keys(personalities).filter(p => p !== newPersonality)
+                    .map(p => [p, Math.floor(Math.random() * 25)])
+            )
+        };
+        
+        showPersonalityResults();
+    }, 800);
+}
+
+// Show progressive onboarding form with clear progress
 function showFeedbackForm() {
     const personality = personalities[appState.personality];
     
     document.getElementById('app').innerHTML = `
         <div class="progressive-onboarding glass-strong fade-in">
-            <h2 class="section-title" style="color: ${personality.theme.primary}; margin-bottom: 20px;">
-                Quick questions to personalize your experience
-            </h2>
-            <p style="opacity: 0.8; text-align: center; margin-bottom: 30px; font-size: 0.95rem;">
-                Just tap what fits - no typing needed!
-            </p>
+            <div class="onboarding-header" style="text-align: center; margin-bottom: 30px;">
+                <h2 class="section-title" style="color: ${personality.theme.primary}; margin-bottom: 15px;">
+                    Let's personalize your experience
+                </h2>
+                <p style="opacity: 0.8; font-size: 0.95rem; margin-bottom: 20px;">
+                    Just 3 quick questions - no typing required!
+                </p>
+                
+                <!-- Progress Bar -->
+                <div class="progress-bar-container" style="background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; margin-bottom: 10px; overflow: hidden;">
+                    <div class="progress-bar" id="onboardingProgress" style="background: ${personality.theme.primary}; height: 100%; width: 0%; transition: width 0.5s ease;"></div>
+                </div>
+                <p style="font-size: 0.8rem; opacity: 0.6;">
+                    Question <span id="currentStep">0</span> of 3
+                </p>
+            </div>
             
-            <div class="feedback-card">
-                <div class="feedback-question">How do you feel about your current work/study situation?</div>
-                <div class="choice-grid">
-                    <button class="choice-btn" onclick="selectChoice('workFeeling', 'love', '🔥 Love it! It energizes me')">
-                        🔥 Love it! It energizes me
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('workFeeling', 'like', '👍 Pretty good, mostly satisfied')">
-                        👍 Pretty good, mostly satisfied
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('workFeeling', 'meh', '😐 It pays the bills')">
-                        😐 It pays the bills
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('workFeeling', 'drain', '😩 It drains my soul')">
-                        😩 It drains my soul
-                    </button>
+            <div class="onboarding-step" id="step1">
+                <div class="feedback-card">
+                    <div class="feedback-question">How do you feel about your current work/study situation?</div>
+                    <div class="choice-grid">
+                        <button class="choice-btn" onclick="selectChoice('workFeeling', 'love', '🔥 Love it! It energizes me')">
+                            🔥 Love it! It energizes me
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('workFeeling', 'like', '👍 Pretty good, mostly satisfied')">
+                            👍 Pretty good, mostly satisfied
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('workFeeling', 'meh', '😐 It pays the bills')">
+                            😐 It pays the bills
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('workFeeling', 'drain', '😩 It drains my soul')">
+                            😩 It drains my soul
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="feedback-card">
-                <div class="feedback-question">What's your energy like most days?</div>
-                <div class="choice-grid">
-                    <button class="choice-btn" onclick="selectChoice('energyLevel', 'high', '⚡ High energy, ready for anything')">
-                        ⚡ High energy, ready for anything
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('energyLevel', 'steady', '🌱 Steady, consistent energy')">
-                        🌱 Steady, consistent energy
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('energyLevel', 'ups-downs', '🎢 Ups and downs throughout the day')">
-                        🎢 Ups and downs throughout the day
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('energyLevel', 'low', '😴 Often tired or low energy')">
-                        😴 Often tired or low energy
-                    </button>
+            <div class="onboarding-step" id="step2" style="display: none;">
+                <div class="feedback-card">
+                    <div class="feedback-question">What's your energy like most days?</div>
+                    <div class="choice-grid">
+                        <button class="choice-btn" onclick="selectChoice('energyLevel', 'high', '⚡ High energy, ready for anything')">
+                            ⚡ High energy, ready for anything
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('energyLevel', 'steady', '🌱 Steady, consistent energy')">
+                            🌱 Steady, consistent energy
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('energyLevel', 'ups-downs', '🎢 Ups and downs throughout the day')">
+                            🎢 Ups and downs throughout the day
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('energyLevel', 'low', '😴 Often tired or low energy')">
+                            😴 Often tired or low energy
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="feedback-card">
-                <div class="feedback-question">When you have free time, you usually want to...</div>
-                <div class="choice-grid">
-                    <button class="choice-btn" onclick="selectChoice('freeTime', 'active', '🏃 Do something active or challenging')">
-                        🏃 Do something active or challenging
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('freeTime', 'social', '👥 Connect with people I care about')">
-                        👥 Connect with people I care about
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('freeTime', 'create', '🎨 Create or explore something new')">
-                        🎨 Create or explore something new
-                    </button>
-                    <button class="choice-btn" onclick="selectChoice('freeTime', 'recharge', '🛋️ Relax and recharge my batteries')">
-                        🛋️ Relax and recharge my batteries
-                    </button>
+            <div class="onboarding-step" id="step3" style="display: none;">
+                <div class="feedback-card">
+                    <div class="feedback-question">When you have free time, you usually want to...</div>
+                    <div class="choice-grid">
+                        <button class="choice-btn" onclick="selectChoice('freeTime', 'active', '🏃 Do something active or challenging')">
+                            🏃 Do something active or challenging
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('freeTime', 'social', '👥 Connect with people I care about')">
+                            👥 Connect with people I care about
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('freeTime', 'create', '🎨 Create or explore something new')">
+                            🎨 Create or explore something new
+                        </button>
+                        <button class="choice-btn" onclick="selectChoice('freeTime', 'recharge', '🛋️ Relax and recharge my batteries')">
+                            🛋️ Relax and recharge my batteries
+                        </button>
+                    </div>
                 </div>
             </div>
             
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="finishOnboarding()" id="continueBtn" style="opacity: 0.5; pointer-events: none;">
-                    <i class="fas fa-magic"></i>
-                    Show me what I should do now! (<span id="answerCount">0</span>/3)
-                </button>
+            <div class="onboarding-complete" id="stepComplete" style="display: none;">
+                <div style="text-align: center; padding: 30px;">
+                    <div style="font-size: 3rem; margin-bottom: 20px;">✨</div>
+                    <h3 style="color: ${personality.theme.primary}; margin-bottom: 15px;">Perfect! I understand you much better now.</h3>
+                    <p style="opacity: 0.8; margin-bottom: 30px;">
+                        Let me create personalized recommendations based on who you are and what you need right now.
+                    </p>
+                    <button class="btn btn-primary" onclick="finishOnboarding()">
+                        <i class="fas fa-magic"></i>
+                        Show me what I should do now!
+                    </button>
+                </div>
             </div>
         </div>
     `;
+    
+    updateOnboardingProgress();
 }
 
-// Handle choice selection in onboarding
+// Track onboarding progress
+let onboardingStep = 1;
+
 function selectChoice(category, value, text) {
     appState.userProfile[category] = { value, text };
     
-    // Visual feedback
-    const buttons = document.querySelectorAll(`button[onclick*="${category}"]`);
+    // Visual feedback for selection
+    const currentStepElement = document.getElementById(`step${onboardingStep}`);
+    const buttons = currentStepElement.querySelectorAll('.choice-btn');
     buttons.forEach(btn => {
         btn.style.background = 'rgba(255, 255, 255, 0.1)';
         btn.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+        btn.style.opacity = '0.6';
     });
     
     event.target.style.background = 'rgba(78, 205, 196, 0.3)';
     event.target.style.borderColor = '#4ECDC4';
+    event.target.style.opacity = '1';
     
-    // Update progress
+    // Show immediate feedback
+    const feedbackDiv = document.createElement('div');
+    feedbackDiv.style.cssText = `
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background: rgba(78, 205, 196, 0.95); color: white; padding: 15px 25px;
+        border-radius: 12px; font-weight: 600; z-index: 1000;
+        animation: quickFade 1s ease-out forwards;
+    `;
+    feedbackDiv.textContent = 'Got it! 👍';
+    document.body.appendChild(feedbackDiv);
+    
+    setTimeout(() => {
+        feedbackDiv.remove();
+        advanceOnboardingStep();
+    }, 800);
+    
+    updateOnboardingProgress();
+}
+
+function advanceOnboardingStep() {
+    // Hide current step
+    document.getElementById(`step${onboardingStep}`).style.display = 'none';
+    
+    onboardingStep++;
+    
+    if (onboardingStep <= 3) {
+        // Show next step
+        document.getElementById(`step${onboardingStep}`).style.display = 'block';
+        updateOnboardingProgress();
+    } else {
+        // Show completion
+        document.getElementById('stepComplete').style.display = 'block';
+        updateOnboardingProgress();
+    }
+}
+
+function updateOnboardingProgress() {
     const answeredCount = Object.keys(appState.userProfile).filter(key => 
         ['workFeeling', 'energyLevel', 'freeTime'].includes(key)
     ).length;
     
-    document.getElementById('answerCount').textContent = answeredCount;
+    const progressBar = document.getElementById('onboardingProgress');
+    const currentStepSpan = document.getElementById('currentStep');
     
-    if (answeredCount >= 3) {
-        const continueBtn = document.getElementById('continueBtn');
-        continueBtn.style.opacity = '1';
-        continueBtn.style.pointerEvents = 'auto';
+    if (progressBar) {
+        progressBar.style.width = `${(answeredCount / 3) * 100}%`;
+    }
+    
+    if (currentStepSpan) {
+        currentStepSpan.textContent = answeredCount;
     }
 }
+
+// Add quick fade animation
+const quickFadeStyle = document.createElement('style');
+quickFadeStyle.textContent = `
+    @keyframes quickFade {
+        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+    }
+`;
+document.head.appendChild(quickFadeStyle);
 
 // Finish onboarding and show recommendations
 function finishOnboarding() {
