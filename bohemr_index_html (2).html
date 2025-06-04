@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BohemR - What Should You Do Now?</title>
+    <meta name="description" content="The app that truly gets you - discover what you should do next based on who you really are">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Meta tags for social sharing -->
+    <meta property="og:title" content="BohemR - What Should You Do Now?">
+    <meta property="og:description" content="The app that truly gets you - discover what you should do next">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google APIs for Calendar Integration -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <!-- Google Identity Services for Authentication -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Microsoft Graph SDK for Outlook Calendar -->
+    <script src="https://alcdn.msauth.net/browser/2.0.0/js/msal-browser.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="personality-adaptive">
+    <div class="cosmic-bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="app-container">
+        <header class="header fade-in">
+            <div class="header-top">
+                <h1 class="logo trust-indicator">BohemR</h1>
+                <div class="auth-section" id="authButton">
+                    <!-- Authentication button will be inserted here -->
+                </div>
+            </div>
+            
+            <div class="user-info" id="userInfo" style="display: none;">
+                <!-- User welcome message will be inserted here -->
+            </div>
+            
+            <p class="tagline">What should you do now?</p>
+            
+            <!-- Enhanced Permission Status Indicators -->
+            <div class="permission-status" id="permissionStatus">
+                <div class="permission-item" id="locationPerm" onclick="enhancedPermissionManager.requestLocationPermission()">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Location</span>
+                </div>
+                <div class="permission-item" id="notificationPerm" onclick="enhancedPermissionManager.requestNotificationPermission()">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </div>
+                <div class="permission-item" id="calendarPerm" onclick="enhancedPermissionManager.requestEnhancedCalendar()">
+                    <i class="fas fa-calendar"></i>
+                    <span>Calendar</span>
+                </div>
+                <div class="permission-item" id="fitnessPerm" onclick="enhancedPermissionManager.requestGoogleFitPermission()">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>Fitness</span>
+                </div>
+                <div class="permission-item" id="newsPerm" onclick="enhancedPermissionManager.setupNewsPreferences()">
+                    <i class="fas fa-newspaper"></i>
+                    <span>News</span>
+                </div>
+            </div>
+            
+            <!-- Trust Meter Display -->
+            <div class="trust-meter trust-indicator" id="trustMeter">
+                <div class="trust-level-display">
+                    <span class="trust-label">Understanding Level:</span>
+                    <div class="trust-progress">
+                        <div class="trust-bar" id="trustBar"></div>
+                    </div>
+                    <span class="trust-text" id="trustText">Getting to know you</span>
+                </div>
+            </div>
+        </header>
+        
+        <main id="app">
+            <!-- Content will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <!-- Include all script files -->
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script src="enhanced-permissions.js"></script>
+    <script src="personality.js"></script>
+    <script src="recommendations.js"></script>
+    <script src="ml-engine.js"></script>
+    <script src="enhanced-ui.js"></script>
+    <script src="app.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BohemR - What Should You Do Now?</title>
+    <meta name="description" content="The app that truly gets you - discover what you should do next based on who you really are">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Meta tags for social sharing -->
+    <meta property="og:title" content="BohemR - What Should You Do Now?">
+    <meta property="og:description" content="The app that truly gets you - discover what you should do next">
+    <meta property="og:type" content="website">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google APIs for Calendar Integration -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    
+    <!-- Microsoft Graph SDK for Outlook Calendar -->
+    <script src="https://alcdn.msauth.net/browser/2.0.0/js/msal-browser.min.js"></script>
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="cosmic-bg"></div>
+    <div class="particles" id="particles"></div>
+    
+    <div class="app-container">
+        <header class="header fade-in">
+            <h1 class="logo">BohemR</h1>
+            <p class="tagline">What should you do now?</p>
+            
+            <!-- Permission Status Indicators -->
+            <div class="permission-status" id="permissionStatus">
+                <div class="permission-item" id="locationPerm" onclick="requestLocationPermission()">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Location</span>
+                </div>
+                <div class="permission-item" id="notificationPerm" onclick="requestNotificationPermission()">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                </div>
+                <div class="permission-item" id="calendarPerm" onclick="requestCalendarPermission()">
+                    <i class="fas fa-calendar"></i>
+                    <span>Calendar</span>
+                </div>
+            </div>
+        </header>
+        
+        <main id="app">
+            <!-- Content will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="permissions.js"></script>
+    <script src="personality.js"></script>
+    <script src="recommendations.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

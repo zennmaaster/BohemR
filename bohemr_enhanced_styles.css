@@ -1,0 +1,480 @@
+/* Enhanced Styles for BohemR v2.0 */
+
+/* Enhanced Header Layout */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.auth-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.user-profile:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.profile-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--primary-color);
+}
+
+.profile-pic-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+}
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+.user-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.user-welcome {
+    text-align: center;
+    color: #fff;
+}
+
+.sync-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 5px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    color: var(--primary-color);
+}
+
+/* Enhanced Permission Status */
+.permission-status {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.permission-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    opacity: 0.7;
+    padding: 8px 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.permission-item i {
+    font-size: 1.2rem;
+    margin-bottom: 2px;
+}
+
+.permission-item span {
+    font-size: 0.65rem;
+    font-weight: 500;
+}
+
+/* Trust Meter Styling */
+.trust-meter {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.trust-level-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+}
+
+.trust-label {
+    font-weight: 500;
+    opacity: 0.8;
+    min-width: 120px;
+}
+
+.trust-progress {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+}
+
+.trust-bar {
+    height: 100%;
+    background: var(--personality-gradient);
+    border-radius: 4px;
+    transition: width 1s ease;
+    width: 25%; /* Will be updated by JavaScript */
+}
+
+.trust-text {
+    font-weight: 600;
+    color: var(--primary-color);
+    min-width: 100px;
+    text-align: right;
+}
+
+/* User Menu */
+.user-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 80px 20px 20px 20px;
+    z-index: 1000;
+}
+
+.user-menu {
+    min-width: 280px;
+    max-width: 320px;
+    padding: 25px;
+    border-radius: 16px;
+    animation: menuSlideIn 0.3s ease-out;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.user-details h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.user-details p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.7;
+    color: #fff;
+}
+
+.menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 20px 0;
+}
+
+.menu-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    width: 100%;
+    text-align: left;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.menu-item i {
+    width: 16px;
+    opacity: 0.8;
+}
+
+/* Enhanced Notifications */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    max-width: 350px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    animation: notificationSlideIn 0.4s ease-out;
+}
+
+.notification-success {
+    background: linear-gradient(45deg, #00B894, #00CEC9);
+}
+
+.notification-error {
+    background: linear-gradient(45deg, #FF6B6B, #FF8E8E);
+}
+
+.notification-info {
+    background: linear-gradient(45deg, #4ECDC4, #44A08D);
+}
+
+.notification-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notification-content i {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* News Category Selection */
+.news-categories {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.news-category {
+    padding: 10px 8px;
+    font-size: 0.8rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.news-category.selected {
+    background: rgba(78, 205, 196, 0.3) !important;
+    border-color: #4ECDC4 !important;
+    color: #4ECDC4;
+    font-weight: 600;
+}
+
+/* Context Gathering Interface */
+.context-gathering {
+    padding: 30px 25px;
+    margin-bottom: 20px;
+}
+
+.context-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.context-question {
+    margin-bottom: 20px;
+}
+
+.context-complete {
+    text-align: center;
+    padding: 30px;
+}
+
+/* Enhanced Recommendation Cards */
+.recommendation-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.recommendation-card .rec-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.recommendation-card .mlScore {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.confidence-high {
+    color: #4ECDC4;
+}
+
+.confidence-medium {
+    color: #FFD93D;
+}
+
+.confidence-low {
+    color: #FF6B6B;
+}
+
+/* Enhanced Animation Keyframes */
+@keyframes menuSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(20px) translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+@keyframes notificationSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+@keyframes personalityFloat {
+    0%, 100% { 
+        transform: translateY(0px) rotate(0deg); 
+        opacity: 0.6; 
+    }
+    25% { 
+        transform: translateY(-15px) rotate(90deg); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: translateY(-25px) rotate(180deg); 
+        opacity: 0.8; 
+    }
+    75% { 
+        transform: translateY(-10px) rotate(270deg); 
+        opacity: 0.9; 
+    }
+}
+
+/* Responsive Design for Enhanced Features */
+@media (max-width: 480px) {
+    .permission-status {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+    
+    .permission-item {
+        padding: 6px 3px;
+        font-size: 0.65rem;
+    }
+    
+    .permission-item i {
+        font-size: 1rem;
+    }
+    
+    .permission-item span {
+        font-size: 0.6rem;
+    }
+    
+    .trust-level-display {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+    
+    .trust-label,
+    .trust-text {
+        min-width: auto;
+    }
+    
+    .header-top {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .user-menu {
+        min-width: 260px;
+        margin: 0 10px;
+    }
+    
+    .news-categories {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Dark mode and accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    .trust-bar,
+    .notification,
+    .user-profile,
+    .permission-item {
+        transition: none;
+    }
+    
+    .cube-3d {
+        animation: none;
+    }
+    
+    .data-particle,
+    .personality-particle {
+        animation: none;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .permission-item.granted {
+        background: #4ECDC4;
+        color: #000;
+    }
+    
+    .permission-item.denied {
+        background: #FF6B6B;
+        color: #000;
+    }
+    
+    .trust-bar {
+        background: #4ECDC4;
+    }
+    
+    .notification {
+        border: 2px solid #fff;
+    }
+}
